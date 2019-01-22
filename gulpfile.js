@@ -10,7 +10,6 @@ const jasmine = require('gulp-jasmine');
 const minimist = require('minimist');
 const ts = require('gulp-typescript');
 const tslint = require('gulp-tslint');
-const runSequence = require('run-sequence');
 const filter = require('gulp-filter');
 
 const options = minimist(process.argv.slice(2), {strings: ['type']});
@@ -31,12 +30,26 @@ const getPackageJsonVersion = () => {
 
 const tsProjectBuildOutput = ts.createProject('tsconfig.json', {noEmit: false});
 
+gulp.task('compile-build-output', () => {
+    return compileBuildOutput();
+});
+
 gulp.task('bump-version', (callback) => {
     exec(`npm version ${getBumpType()} --no-git-tag-version`, (err, stdout, stderr) => {
         console.log(stdout);
         console.log(stderr);
         callback(err);
     });
+});
+
+gulp.task('clean-dist', () => {
+    return del(['dist/*']);
+});
+
+gulp.task('compile-dist', () => {
+    const tsProjectDist = ts.createProject('tsconfig.json', {noEmit: false});
+    const tsResult = gulp.src('lib/**/*.ts').pipe(tsProjectDist());
+    return tsResult.js.pipe(gulp.dest('dist'));
 });
 
 gulp.task('changelog', () => {
@@ -49,25 +62,9 @@ gulp.task('clean-build-output', () => {
     return del(['build-output/**/*.js']);
 });
 
-gulp.task('clean-and-compile-build-output', (callback) => {
-    runSequence(
-        'clean-build-output',
-        ['compile-build-output'],
-        callback
-    );
-});
+gulp.task('clean-and-compile-build-output', gulp.series('clean-build-output','compile-build-output'));
 
-gulp.task('clean-and-compile-dist', (callback) => {
-    runSequence(
-        'clean-dist',
-        'compile-dist',
-        callback
-    );
-});
-
-gulp.task('clean-dist', () => {
-    return del(['dist/*']);
-});
+gulp.task('clean-and-compile-dist', gulp.series('clean-dist', 'compile-dist'));
 
 gulp.task('commit-changes', () => {
     return gulp.src('.')
@@ -80,29 +77,11 @@ const compileBuildOutput = () => {
     return tsResult.js.pipe(gulp.dest('build-output'));
 };
 
-gulp.task('compile-build-output', () => {
-    return compileBuildOutput();
-});
-
-gulp.task('compile-dist', () => {
-    const tsProjectDist = ts.createProject('tsconfig.json', {noEmit: false});
-    const tsResult = gulp.src('lib/**/*.ts').pipe(tsProjectDist());
-    return tsResult.js.pipe(gulp.dest('dist'));
-});
-
-
 gulp.task('create-new-tag', (callback) => {
     const version = getPackageJsonVersion();
     git.tag(version, `Created Tag for version: ${version}`, callback);
 });
 
-gulp.task('default', (callback) => {
-    runSequence(
-        ['clean-and-compile-build-output', 'lint-commits'],
-        ['lint-typescript', 'test'],
-        callback
-    );
-});
 
 gulp.task('lint-commits', (callback) => {
     exec('./node_modules/.bin/conventional-changelog-lint --from=99ff46d67 --preset angular',
@@ -125,49 +104,52 @@ gulp.task('push-changes', (callback) => {
     git.push('origin', 'master', {args: '--tags'}, callback);
 });
 
-gulp.task('release', (callback) => {
-    runSequence(
-        'default',
-        'clean-and-compile-dist',
-        'bump-version',
-        'changelog',
-        'commit-changes',
-        'create-new-tag',
-        'push-changes',
-        'npm-publish',
-        callback
-    );
-});
-
-const specHelperPath = 'build-output/test/support/spec-helper.js';
 const unitTests = 'build-output/test/unit/**/*.spec.js';
 const e2eTests = 'build-output/test/e2e/**/*.spec.js';
 
 gulp.task('e2e-test', () => {
-    return gulp.src([specHelperPath, e2eTests])
+    return gulp.src([e2eTests])
         .pipe(jasmine({includeStackTrace: true}))
 });
 
 gulp.task('test', () => {
-    return gulp.src([specHelperPath, e2eTests, unitTests])
+    return gulp.src([e2eTests, unitTests])
         .pipe(jasmine({includeStackTrace: true}))
 });
 
 gulp.task('unit-test', () => {
-    return gulp.src([specHelperPath, unitTests])
+    return gulp.src([unitTests])
         .pipe(jasmine({includeStackTrace: true}))
 });
 
 gulp.task('compile-and-unit-test', () => {
     return compileBuildOutput()
-        .pipe(filter([specHelperPath, unitTests]))
+        .pipe(filter([unitTests]))
         .pipe(jasmine({includeStackTrace: true}));
 });
 
-gulp.task('watch', ['clean-and-compile-build-output'], () => {
-    gulp.watch(['lib/**/*.ts', 'test/**/*.ts'], ['compile-and-unit-test']);
-});
+gulp.task('watch', gulp.series('clean-and-compile-build-output', () => {
+    gulp.watch(['lib/**/*.ts', 'test/**/*.ts'])
+        .on('all', gulp.series('compile-and-unit-test'));
+}));
 
 gulp.task('watch-e2e', () => {
-    gulp.watch(['build-output/lib/**/*', 'build-output/test/e2e/**/*', 'test/e2e/**/*.json'], ['e2e-test']);
+    gulp.watch(['build-output/lib/**/*', 'build-output/test/e2e/**/*', 'test/e2e/**/*.json'])
+        .on('all', gulp.series('compile-and-unit-test'));
 });
+
+gulp.task('default', gulp.series(
+    gulp.parallel('clean-and-compile-build-output', 'lint-commits'),
+    gulp.parallel('lint-typescript', 'test')
+));
+
+gulp.task('release', gulp.series(
+    'default',
+    'clean-and-compile-dist',
+    'bump-version',
+    'changelog',
+    'commit-changes',
+    'create-new-tag',
+    'push-changes',
+    'npm-publish'
+));
