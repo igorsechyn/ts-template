@@ -1,0 +1,44 @@
+{
+  "name": "template",
+  "version": "0.0.0",
+  "description": "Helper to run e2e tests for droids",
+  "scripts": {
+    "test": "./node_modules/.bin/gulp",
+    "watch": "./node_modules/.bin/gulp watch",
+    "release-major": "./node_modules/.bin/gulp release --type major",
+    "release-minor": "./node_modules/.bin/gulp release --type minor",
+    "release-patch": "./node_modules/.bin/gulp release --type patch"
+  },
+  "engines": {
+    "node": ">=6.11.4"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^2.8.8",
+    "conventional-changelog-lint": "1.1.9",
+    "del": "^3.0.0",
+    "express": "^4.16.3",
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.4.0",
+    "gulp-conventional-changelog": "^1.1.24",
+    "gulp-filter": "^5.1.0",
+    "gulp-git": "^2.8.0",
+    "gulp-jasmine": "^3.0.0",
+    "gulp-tslint": "^8.1.2",
+    "gulp-typescript": "^3.2.2",
+    "jasmine": "^2.8.0",
+    "minimist": "^1.2.0",
+    "run-sequence": "^2.1.0",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/igorsechyn/concierge.git"
+  },
+  "author": "Igor Sechyn",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/igorsechyn/concierge/issues"
+  },
+  "homepage": "https://github.com/igorsechyn/concierge#readme"
+}
