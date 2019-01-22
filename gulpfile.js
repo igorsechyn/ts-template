@@ -98,14 +98,14 @@ gulp.task('create-new-tag', (callback) => {
 
 gulp.task('default', (callback) => {
     runSequence(
-        ['clean-and-compile-build-output'/*', lint-commits'*/],
+        ['clean-and-compile-build-output', 'lint-commits'],
         ['lint-typescript', 'test'],
         callback
     );
 });
 
 gulp.task('lint-commits', (callback) => {
-    exec('./node_modules/.bin/conventional-changelog-lint --from=HEAD~20 --preset angular',
+    exec('./node_modules/.bin/conventional-changelog-lint --from=99ff46d67 --preset angular',
         (err, stdout, stderr) => {
             console.log(stdout);
             console.log(stderr);
