@@ -1,7 +1,7 @@
 {
   "name": "template",
   "version": "0.0.0",
-  "description": "Helper to run e2e tests for droids",
+  "description": "typescript template for libraries",
   "scripts": {
     "test": "./node_modules/.bin/gulp",
     "watch": "./node_modules/.bin/gulp watch",
