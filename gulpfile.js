@@ -52,10 +52,12 @@ gulp.task('compile-dist', () => {
     return tsResult.js.pipe(gulp.dest('dist'));
 });
 
-gulp.task('changelog', () => {
-    return gulp.src('CHANGELOG.md', {buffer: false})
-        .pipe(conventionalChangelog({preset: 'angular'}))
-        .pipe(gulp.dest('./'));
+gulp.task('changelog', (callback) => {
+    exec('./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s -r 0', (err, stdout, stderr) => {
+        console.log(stdout);
+        console.log(stderr);
+        callback(err);
+    });
 });
 
 gulp.task('clean-build-output', () => {
@@ -84,7 +86,7 @@ gulp.task('create-new-tag', (callback) => {
 
 
 gulp.task('lint-commits', (callback) => {
-    exec('./node_modules/.bin/conventional-changelog-lint --from=99ff46d67 --preset angular',
+    exec('./node_modules/.bin/commitlint --from=99ff46d67 --preset angular',
         (err, stdout, stderr) => {
             console.log(stdout);
             console.log(stderr);
@@ -97,8 +99,6 @@ gulp.task('lint-typescript', () => {
         .pipe(tslint())
         .pipe(tslint.report());
 });
-
-gulp.task('npm-publish', () => exec('npm publish'));
 
 gulp.task('push-changes', (callback) => {
     git.push('origin', 'master', {args: '--tags'}, callback);
@@ -129,13 +129,11 @@ gulp.task('compile-and-unit-test', () => {
 });
 
 gulp.task('watch', gulp.series('clean-and-compile-build-output', () => {
-    gulp.watch(['lib/**/*.ts', 'test/**/*.ts'])
-        .on('all', gulp.series('compile-and-unit-test'));
+    return gulp.watch(['lib/**/*.ts', 'test/**/*.ts'], gulp.series('compile-and-unit-test'));
 }));
 
 gulp.task('watch-e2e', () => {
-    gulp.watch(['build-output/lib/**/*', 'build-output/test/e2e/**/*', 'test/e2e/**/*.json'])
-        .on('all', gulp.series('compile-and-unit-test'));
+    return gulp.watch(['build-output/lib/**/*', 'build-output/test/e2e/**/*'], gulp.series('e2e-test'));
 });
 
 gulp.task('default', gulp.series(
@@ -150,6 +148,5 @@ gulp.task('release', gulp.series(
     'changelog',
     'commit-changes',
     'create-new-tag',
-    'push-changes',
-    'npm-publish'
+    'push-changes'
 ));
