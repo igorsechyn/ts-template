@@ -1,18 +1,18 @@
 'use strict';
 
-const conventionalChangelog = require('gulp-conventional-changelog');
-const del = require('del');
-const exec = require('child_process').exec;
-const fs = require('fs');
-const git = require('gulp-git');
-const gulp = require('gulp');
-const jasmine = require('gulp-jasmine');
-const minimist = require('minimist');
-const ts = require('gulp-typescript');
-const tslint = require('gulp-tslint');
-const filter = require('gulp-filter');
+import { exec } from 'child_process';
+import del from 'del';
+import fs from 'fs';
+import gulp from 'gulp';
+import conventionalChangelog from 'gulp-conventional-changelog';
+import filter from 'gulp-filter';
+import git from 'gulp-git';
+import jasmine from 'gulp-jasmine';
+import tslint from 'gulp-tslint';
+import ts from 'gulp-typescript';
+import minimist from 'minimist';
 
-const options = minimist(process.argv.slice(2), { strings: ['type'] });
+const options = minimist(process.argv.slice(2), { string: ['type'] });
 
 const getBumpType = () => {
   const validTypes = ['major', 'minor', 'patch', 'prerelease'];
@@ -38,7 +38,7 @@ gulp.task('compile-build-output', () => {
   return compileBuildOutput();
 });
 
-gulp.task('bump-version', (callback) => {
+gulp.task('bump-version', (callback: any) => {
   exec(
     `npm version ${getBumpType()} --no-git-tag-version`,
     (err, stdout, stderr) => {
@@ -59,15 +59,17 @@ gulp.task('compile-dist', () => {
   return tsResult.js.pipe(gulp.dest('dist'));
 });
 
-gulp.task('changelog', (callback) => {
-  exec(
-    './node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s -r 0',
-    (err, stdout, stderr) => {
-      console.log(stdout);
-      console.log(stderr);
-      callback(err);
-    }
-  );
+gulp.task('changelog', () => {
+  return gulp
+    .src('CHANGELOG.md', { buffer: false })
+    .pipe(
+      conventionalChangelog({
+        preset: 'angular',
+        releaseCount: 0,
+        sameFile: true,
+      })
+    )
+    .pipe(gulp.dest('./'));
 });
 
 gulp.task('clean-build-output', () => {
@@ -81,6 +83,10 @@ gulp.task(
 
 gulp.task('clean-and-compile-dist', gulp.series('clean-dist', 'compile-dist'));
 
+gulp.task('switch-to-release-branch', () => {});
+gulp.task('switch-to-master-branch', () => {});
+gulp.task('force-commit-dist', () => {});
+
 gulp.task('commit-changes', () => {
   return gulp
     .src('.')
@@ -93,12 +99,12 @@ const compileBuildOutput = () => {
   return tsResult.js.pipe(gulp.dest('build-output'));
 };
 
-gulp.task('create-new-tag', (callback) => {
+gulp.task('create-new-tag', (callback: any) => {
   const version = getPackageJsonVersion();
   git.tag(version, `Created Tag for version: ${version}`, callback);
 });
 
-gulp.task('lint-commits', (callback) => {
+gulp.task('lint-commits', (callback: any) => {
   exec(
     './node_modules/.bin/commitlint --from=99ff46d67 --preset angular',
     (err, stdout, stderr) => {
@@ -116,7 +122,7 @@ gulp.task('lint-typescript', () => {
     .pipe(tslint.report());
 });
 
-gulp.task('push-changes', (callback) => {
+gulp.task('push-changes', (callback: any) => {
   git.push('origin', 'master', { args: '--tags' }, callback);
 });
 
@@ -178,5 +184,20 @@ gulp.task(
     'commit-changes',
     'create-new-tag',
     'push-changes'
+  )
+);
+gulp.task(
+  'release-cli',
+  gulp.series(
+    'default',
+    'clean-and-compile-dist',
+    'bump-version',
+    'changelog',
+    'commit-changes',
+    'switch-to-release-branch',
+    'force-commit-dist',
+    'create-new-tag',
+    'push-changes',
+    'switch-to-master-branch'
   )
 );

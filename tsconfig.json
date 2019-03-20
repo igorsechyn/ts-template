@@ -1,9 +1,12 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "*": ["types/*"] },
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
     "moduleResolution": "node",
+    "esModuleInterop": true,
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
@@ -16,5 +19,5 @@
     "strictNullChecks": true,
     "target": "es6"
   },
-  "include": ["lib/**/*", "test/**/*"]
+  "include": ["lib/**/*", "test/**/*", "gulpfile.ts"]
 }

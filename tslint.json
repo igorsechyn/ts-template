@@ -6,7 +6,7 @@
     "no-console": [false],
     "no-implicit-dependencies": [true, "dev"],
     "quotemark": [true, "single"],
-    "trailing-comma": [true, { "multiline": "never", "singleline": "never" }],
+    "trailing-comma": [true, { "singleline": "never" }],
     "prefer-object-spread": false,
     "no-default-export": true,
     "member-access": [true, "check-constructor"]
