@@ -83,9 +83,38 @@ gulp.task(
 
 gulp.task('clean-and-compile-dist', gulp.series('clean-dist', 'compile-dist'));
 
-gulp.task('switch-to-release-branch', () => {});
-gulp.task('switch-to-master-branch', () => {});
-gulp.task('force-commit-dist', () => {});
+let startingBranch = 'master'; // default to master
+let releaseBranch = '';
+gulp.task('switch-to-release-branch', (callback: any) => {
+  git.revParse({ args: '--abbrev-ref HEAD' }, (err: any, branch: string) => {
+    if (err) {
+      callback(err);
+    }
+    startingBranch = branch;
+    releaseBranch = `release-${getPackageJsonVersion()}`;
+    git.checkout(releaseBranch, { args: '-b' }, callback);
+  });
+});
+gulp.task('switch-to-start-branch', (callback: any) => {
+  git.checkout(startingBranch, {}, (err: any) => {
+    if (err) {
+      callback(err);
+    }
+    if (releaseBranch) {
+      git.branch(releaseBranch, { args: '-d' }, callback);
+    } else {
+      callback();
+    }
+  });
+});
+gulp.task('force-commit-dist', () => {
+  return gulp
+    .src('./dist')
+    .pipe(git.add({ args: '-f' }))
+    .pipe(
+      git.commit(`chore: add ./dist for release ${getPackageJsonVersion()}`)
+    );
+});
 
 gulp.task('commit-changes', () => {
   return gulp
@@ -198,6 +227,6 @@ gulp.task(
     'force-commit-dist',
     'create-new-tag',
     'push-changes',
-    'switch-to-master-branch'
+    'switch-to-start-branch'
   )
 );
