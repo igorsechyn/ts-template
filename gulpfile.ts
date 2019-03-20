@@ -101,7 +101,7 @@ gulp.task('switch-to-start-branch', (callback: any) => {
       callback(err);
     }
     if (releaseBranch) {
-      git.branch(releaseBranch, { args: '-d' }, callback);
+      git.branch(releaseBranch, { args: '-D' }, callback);
     } else {
       callback();
     }
