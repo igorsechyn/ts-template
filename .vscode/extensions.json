@@ -1,0 +1,9 @@
+
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-tslint-plugin",
+    "rbbit.typescript-hero",
+    "hbenl.vscode-jasmine-test-adapter"
+  ]
+}

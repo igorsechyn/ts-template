@@ -1,0 +1,7 @@
+{
+  "jasmineExplorer.nodeArgv": ["-r", "ts-node/register"],
+  "testExplorer.codeLens": true,
+  "testExplorer.gutterDecoration": true,
+  "jasmineExplorer.logpanel": true,
+  "jasmineExplorer.config": "test/jasmine.json"
+}
