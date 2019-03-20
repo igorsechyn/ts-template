@@ -1,7 +1,7 @@
 {
   "name": "template",
   "version": "0.0.2",
-  "description": "typescript template for libraries",
+  "description": "typescript template for libraries & cli",
   "scripts": {
     "test": "./node_modules/.bin/gulp",
     "watch": "./node_modules/.bin/gulp watch",
@@ -42,17 +42,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/igorsechyn/concierge.git"
+    "url": "git+ssh://git@github.com:igorsechyn/ts-template.git"
   },
   "author": "Igor Sechyn",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/igorsechyn/concierge/issues"
+    "url": "https://github.com/igorsechyn/ts-template/issues"
   },
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
-  "homepage": "https://github.com/igorsechyn/concierge#readme"
+  "homepage": "https://github.com/igorsechyn/ts-template#readme"
 }
