@@ -8,7 +8,7 @@
 ## What is included
 
 - typescript type checking and transpilation
-- test infrastructure for unit and e2e tests using jasmine (feel free to replace it with other frameworks)
+- test infrastructure for unit and e2e tests using jest (feel free to replace it with other frameworks)
 - code linting
 - [convnentional commit messages linting](https://conventional-changelog.github.io/commitlint/#/)
 - [automated CHANGELOG generation based on commit messages](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-cli)

@@ -6,11 +6,9 @@ const exec = require('child_process').exec;
 const fs = require('fs');
 const git = require('gulp-git');
 const gulp = require('gulp');
-const jasmine = require('gulp-jasmine');
 const minimist = require('minimist');
 const ts = require('gulp-typescript');
 const tslint = require('gulp-tslint');
-const filter = require('gulp-filter');
 
 const options = minimist(process.argv.slice(2), { strings: ['type'] });
 
@@ -50,7 +48,7 @@ gulp.task('bump-version', (callback) => {
 });
 
 gulp.task('clean-dist', () => {
-  return del(['dist/*']);
+  return del(['dist/']);
 });
 
 gulp.task('compile-dist', () => {
@@ -71,7 +69,7 @@ gulp.task('changelog', (callback) => {
 });
 
 gulp.task('clean-build-output', () => {
-  return del(['build-output/**/*.js']);
+  return del(['build-output/']);
 });
 
 gulp.task(
@@ -120,43 +118,14 @@ gulp.task('push-changes', (callback) => {
   git.push('origin', 'master', { args: '--tags' }, callback);
 });
 
-const unitTests = 'build-output/test/unit/**/*.spec.js';
-const e2eTests = 'build-output/test/e2e/**/*.spec.js';
-
-gulp.task('e2e-test', () => {
-  return gulp.src([e2eTests]).pipe(jasmine({ includeStackTrace: true }));
-});
-
-gulp.task('test', () => {
-  return gulp
-    .src([e2eTests, unitTests])
-    .pipe(jasmine({ includeStackTrace: true }));
-});
-
-gulp.task('unit-test', () => {
-  return gulp.src([unitTests]).pipe(jasmine({ includeStackTrace: true }));
-});
-
-gulp.task('compile-and-unit-test', () => {
-  return compileBuildOutput()
-    .pipe(filter([unitTests]))
-    .pipe(jasmine({ includeStackTrace: true }));
-});
-
-gulp.task(
-  'watch',
-  gulp.series('clean-and-compile-build-output', () => {
-    return gulp.watch(
-      ['lib/**/*.ts', 'test/**/*.ts'],
-      gulp.series('compile-and-unit-test')
-    );
-  })
-);
-
-gulp.task('watch-e2e', () => {
-  return gulp.watch(
-    ['build-output/lib/**/*', 'build-output/test/e2e/**/*'],
-    gulp.series('e2e-test')
+gulp.task('test', (callback) => {
+  exec(
+    './node_modules/.bin/jest',
+    (err, stdout, stderr) => {
+      console.log(stdout);
+      console.log(stderr);
+      callback(err);
+    }
   );
 });
 

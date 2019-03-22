@@ -16,5 +16,5 @@
     "strictNullChecks": true,
     "target": "es6"
   },
-  "include": ["lib/**/*", "test/**/*"]
+  "include": ["lib/**/*"]
 }
